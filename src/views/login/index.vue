@@ -124,9 +124,9 @@ export default {
             message: "登陆成功",
             type: "success"
           });
+          setToken(res.data.data.token);
           this.$router.push("/layout");
           // 保存token
-          setToken(res.data.data.token)
         } else {
           this.$message.error(res.data.message);
           this.codeUrl =
