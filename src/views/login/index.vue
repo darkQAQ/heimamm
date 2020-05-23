@@ -125,7 +125,7 @@ export default {
             type: "success"
           });
           setToken(res.data.data.token);
-          this.$router.push("/layout");
+          this.$router.push("/layout/welcome");
           // 保存token
         } else {
           this.$message.error(res.data.message);

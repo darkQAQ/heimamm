@@ -44,7 +44,7 @@
 
         <el-table-column label="操作" width="280px">
           <template slot-scope="scope">
-            <el-button type="primary">编辑</el-button>
+            <el-button type="primary" @click="editUser(scope.row)">编辑</el-button>
             <el-button
               @click="changeStatus(scope.row.id)"
               :type="scope.row.status == 1?'info':'success'"
@@ -64,7 +64,7 @@
       layout="total, sizes, prev, pager, next, jumper"
       :total="total"
     ></el-pagination>
-    <user-edit ref="userEdit"></user-edit>
+    <user-edit ref="userEdit" :mode='mode'></user-edit>
   </div>
 </template>
 
@@ -85,7 +85,8 @@ export default {
       page: 1, //页码
       limit: 2, //一页显示多少
       userList: [], //用户列表
-      total: 0 //总页数
+      total: 0, //总页数
+      mode:'add'
     };
   },
   created() {
@@ -135,7 +136,7 @@ export default {
     },
     //删除用户
     removeUser(id) {
-      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+      this.$confirm("此操作将永久删除该数据, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
@@ -153,9 +154,41 @@ export default {
         .catch(() => {});
     },
     //新增用户
-    addUser(){
+    addUser() {
+      //每次打开之前清空数据
+      (this.$refs.userEdit.userForm = {
+        username: "", //用户名
+        email: "", //邮箱
+        phone: "", //电话
+        role_id: "", //角色
+        status: "", //状态
+        remark: "" //备注
+      }),
+        // 清除校验
+        this.$nextTick(() => {
+          //移除表单项的校验结果。
+          // this.$refs.userEdit.$refs.userFormRef.clearValidate();
+
+          //对整个表单进行重置，
+          this.$refs.userEdit.$refs.userFormRef.resetFields();
+        });
+
       this.$refs.userEdit.dialogVisible = true;
-      this.$refs.userEdit.mode = 'add';
+      this.$refs.userEdit.mode = "add";
+
+      // this.$refs.userEdit.resetFields();
+    },
+    //编辑用户
+    editUser(row) {
+      //赋值
+      this.$refs.userEdit.userForm = JSON.parse(JSON.stringify(row));
+      this.$refs.userEdit.dialogVisible = true;
+      this.mode = "edit";
+      this.$nextTick(()=>{
+        //移除表单项的校验结果。
+        //不能调用重置  会把数据移出 
+          this.$refs.userEdit.$refs.userFormRef.clearValidate();
+      })
     }
   }
 };

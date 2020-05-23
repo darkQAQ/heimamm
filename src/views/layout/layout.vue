@@ -16,6 +16,10 @@
       <el-container>
         <el-aside width="auto">
           <el-menu :default-active="defaultActive" class="el-menu-vertical-demo" router :collapse="isCollapse">
+              <el-menu-item index="/layout/welcome">
+                <i class="el-icon-folder"></i>
+                <span slot="title">个人中心</span>
+              </el-menu-item>
               <el-menu-item index="/layout/chart">
                 <i class="el-icon-pie-chart"></i>
                 <span slot="title">数据预览</span>

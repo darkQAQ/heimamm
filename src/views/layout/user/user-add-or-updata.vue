@@ -14,16 +14,16 @@
         </el-form-item>
         <el-form-item label="角色" prop="role_id">
           <el-select v-model="userForm.role_id" placeholder="请选择角色">
-            <el-option label="超级管理员" value="1"></el-option>
-            <el-option label="管理员" value="2"></el-option>
-            <el-option label="老师" value="3"></el-option>
-            <el-option label="学生" value="4"></el-option>
+            <el-option label="超级管理员" :value="1"></el-option>
+            <el-option label="管理员" :value="2"></el-option>
+            <el-option label="老师" :value="3"></el-option>
+            <el-option label="学生" :value="4"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-select v-model="userForm.status" placeholder="请选择状态">
-            <el-option label="启用" value="1"></el-option>
-            <el-option label="禁用" value="0"></el-option>
+            <el-option label="启用" :value="1"></el-option>
+            <el-option label="禁用" :value="0"></el-option>
           </el-select>
         </el-form-item>
 
@@ -43,10 +43,14 @@
 <script>
 export default {
   name: "UserEdit",
+  props: {
+    mode: String,
+    default: "add"
+  },
   data() {
     return {
       dialogVisible: false,
-      mode: "",
+      // mode: "",
       userForm: {
         username: "", //用户名
         email: "", //邮箱
@@ -99,19 +103,25 @@ export default {
   },
   methods: {
     submitForm() {
-      this.$refs.userFormRef.validate(async(valid) => {
-        if(valid){
-          const res = await this.$axios.post('/user/add',this.userForm);
-          if(res.data.code == 200){
-            this.$message({
-              type: "success",
-              message: "添加成功!"
-            });
-            this.dialogVisible = false;
-            this.$parent.search();
-          }else{
-            this.$message.error(res.data.message);
-          }
+      this.$refs.userFormRef.validate(async valid => {
+        if (!valid) {
+          return;
+        }
+        let res = null;
+        if (this.mode == "add") {
+          const res = await this.$axios.post("/user/add", this.userForm);
+        } else {
+           res = await this.$axios.post("/user/edit", this.userForm);
+        }
+        if (res.data.code == 200) {
+          this.$message({
+            type: "success",
+            message: this.mode == "add" ? "添加成功" : "修改成功"
+          });
+          this.dialogVisible = false;
+          this.$parent.search();
+        } else {
+          this.$message.error(res.data.message);
         }
       });
     }

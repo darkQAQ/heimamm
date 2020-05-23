@@ -1,7 +1,7 @@
 import Vue from 'vue'
 // 导入路由
 import VueRouter from 'vue-router';
-import {getToken} from '@/utils/token.js'
+import { getToken } from '@/utils/token.js'
 
 Vue.use(VueRouter);
 
@@ -13,30 +13,39 @@ import Enterprise from '@/views/layout/enterprise'
 import Question from '@/views/layout/question'
 import Subject from '@/views/layout/subject'
 import User from '@/views/layout/user'
+import Welcome from '@/views/layout/welcome'
+
+//测试练习
+import Parent from '@/test/parent-child-brother/parent'
 const router = new VueRouter({
-    routes:[
-        {path:'*',redirect:'/login'},
-        {path:'/login',component:Login},
-        {path:'/layout',component:Layout,children:[
-            {path:'chart',component:Chart},
-            {path:'enterprise',component:Enterprise},
-            {path:'question',component:Question},
-            {path:'subject',component:Subject},
-            {path:'user',component:User}
-        ]},
+    routes: [
+        { path: '*', redirect: '/login' },
+        { path: '/login', component: Login },
+        {
+            path: '/layout', component: Layout, children: [
+                { path: 'chart', component: Chart },
+                { path: 'enterprise', component: Enterprise },
+                { path: 'question', component: Question },
+                { path: 'subject', component: Subject },
+                { path: 'user', component: User },
+                { path: 'welcome', component: Welcome }
+            ]
+        },
+        //测试练习
+        { path: "/parent", component: Parent },
     ]
 })
 router.beforeEach((to, from, next) => {
-    if(to.fullPath == '/login'){
+    if (to.fullPath == '/login') {
         next();
-    }else{
+    } else {
         const token = getToken();
-        if(token){
+        if (token) {
             next();
-        }else{
+        } else {
             next('/login');
         }
     }
-  })
+})
 
 export default router;
