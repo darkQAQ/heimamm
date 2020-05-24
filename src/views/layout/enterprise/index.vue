@@ -20,7 +20,7 @@
         <el-form-item>
           <el-button type="primary" @click="search">搜索</el-button>
           <el-button type="default" @click="clear">清除</el-button>
-          <el-button type="primary">+新增企业</el-button>
+          <el-button type="primary" @click="addEnterprise">+新增企业</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -32,13 +32,21 @@
         <el-table-column prop="name" label="企业名称" width="180"></el-table-column>
         <el-table-column prop="username" label="创建者"></el-table-column>
         <el-table-column prop="create_time" label="创建日期"></el-table-column>
+        <el-table-column prop="status" label="状态">
+          <template slot-scope="scope">
+            <span
+              :style="{color:scope.row.status == 1?'#87cd67':'red'}"
+            >{{scope.row.status == 1? '启用':'禁用'}}</span>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="280px">
           <template slot-scope="scope">
-            <el-button type="primary">编辑</el-button>
+            <el-button type="primary" @click="editEnterprise(scope.row)">编辑</el-button>
             <el-button
+              @click="changeStatus(scope.row.id)"
               :type="scope.row.status == 1?'info':'success'"
             >{{scope.row.status == 1? '禁用':'启用'}}</el-button>
-            <el-button type="primary">删除</el-button>
+            <el-button type="primary" @click="deleteEnterprise(scope.row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -54,12 +62,15 @@
         ></el-pagination>
       </div>
     </el-card>
+    <enter-edit ref="enterEdit"></enter-edit>
   </div>
 </template>
 
 <script>
+import enterEdit from "./enterprise-add-or-updata";
 export default {
   name: "enterpriseList",
+  components: { enterEdit },
   data() {
     return {
       searchForm: {
@@ -108,6 +119,66 @@ export default {
       this.page = val;
       this.getEnterpriseInfo();
       // console.log(`当前页: ${val}`);
+    },
+    // 改变状态
+    async changeStatus(id) {
+      const res = await this.$axios.post("/enterprise/status", { id });
+      if (res.data.code == 200) {
+        this.getEnterpriseInfo();
+      }
+    },
+    // 删除
+    deleteEnterprise(id) {
+      this.$confirm("此操作将永久删除该信息, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(async () => {
+          const res = await this.$axios.post("/enterprise/remove", { id });
+          if (res.data.code == 200) {
+            this.search();
+          } else {
+            this.$message.error(res.data.message);
+          }
+          this.$message({
+            type: "success",
+            message: "删除成功!"
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除"
+          });
+        });
+    },
+    // 新增企业
+    addEnterprise() {
+      //点击进入 清空数据
+      this.$refs.enterEdit.enterpriseForm = {
+        eid: "", //企业编号
+        name: "", //企业名称
+        short_name: "", //简称
+        intro: "", //企业简介
+        remark: "" //备注
+      };
+      this.$refs.enterEdit.dialogVisible = true;
+      this.$refs.enterEdit.mode == "edit";
+    },
+    // 编辑企业
+    editEnterprise(row) {
+      const { id, eid, name, short_name, intro, remark } = row;
+      this.$refs.enterEdit.enterpriseForm = {
+        id,
+        eid,
+        name,
+        short_name,
+        intro,
+        remark
+      };
+      this.$refs.enterEdit.mode = "edit";
+      this.$refs.enterEdit.dialogVisible = true;
     }
   },
   created() {
