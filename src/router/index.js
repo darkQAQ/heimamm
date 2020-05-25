@@ -17,6 +17,7 @@ import Welcome from '@/views/layout/welcome'
 
 //测试练习
 import Parent from '@/test/parent-child-brother/parent'
+import Slot1 from '@/test/slot1'
 const router = new VueRouter({
     routes: [
         { path: '*', redirect: '/login' },
@@ -33,6 +34,7 @@ const router = new VueRouter({
         },
         //测试练习
         { path: "/parent", component: Parent },
+        { path: "/slot1", component: Slot1 },
     ]
 })
 router.beforeEach((to, from, next) => {

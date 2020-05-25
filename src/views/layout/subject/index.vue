@@ -26,7 +26,7 @@
     </el-card>
 
     <el-card style="margin-top:15px;">
-      <el-table :data="subjectList" style="width: 100%">
+      <el-table stripe :data="subjectList" style="width: 100%">
         <el-table-column type="index" label="序号"></el-table-column>
         <el-table-column prop="rid" label="学科编号"></el-table-column>
         <el-table-column prop="name" label="学科名称"></el-table-column>
