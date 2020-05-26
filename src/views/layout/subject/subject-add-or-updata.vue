@@ -1,5 +1,5 @@
 <template>
-  <div class="subjectEdit">
+  <div class="subject">
     <el-dialog :visible.sync="dialogVisible" width="600px">
       <div class="title" slot="title">{{mode == 'add'?'新增学科':'编辑学科'}}</div>
       <el-form :rules="rules" :model="subjectForm" ref="subjectFormRef" label-width="80px">
@@ -15,7 +15,7 @@
         <el-form-item label="学科简介" prop="intro">
           <el-input v-model="subjectForm.intro"></el-input>
         </el-form-item>
-        <el-form-item label="学科备注" prop="remark">
+        <el-form-item label="备注" prop="remark">
           <el-input v-model="subjectForm.remark"></el-input>
         </el-form-item>
       </el-form>
@@ -32,22 +32,22 @@
 export default {
   data() {
     return {
-      dialogVisible: false,
       mode: "add",
+      dialogVisible: false,
       subjectForm: {
         rid: "", //学科编号
         name: "", //学科名称
-        short_name: "", //学科简介
-        intro: "", //学科简称
+        short_name: "", //学科简称
+        intro: "", //学科简介
         remark: "" //备注
       },
       rules: {
         rid: [{ required: true, message: "请输入学科编号", trigger: "blur" }],
         name: [{ required: true, message: "请输入学科名称", trigger: "blur" }],
         short_name: [
-          { required: true, message: "请输入学科简介", trigger: "blur" }
+          { required: true, message: "请输入学科简称", trigger: "blur" }
         ],
-        intro: [{ required: true, message: "请输入学科简称", trigger: "blur" }],
+        intro: [{ required: true, message: "请输入学科简介", trigger: "blur" }],
         remark: [{ required: true, message: "请输入备注", trigger: "blur" }]
       }
     };
@@ -55,27 +55,29 @@ export default {
   methods: {
     subForm() {
       this.$refs.subjectFormRef.validate(async valid => {
-        if (!valid) return;
+        if (!valid)  return;
         let res = null;
-        if (this.mode == "add") {
-          res = await this.$axios.post("/subject/add", this.subjectForm);
-        } else {
-          res = await this.$axios.post("/subject/edit", this.subjectForm);
+        if(this.mode == 'add'){
+          res = await this.$axios.post('/subject/add',this.subjectForm);
+        }else{
+          res = await this.$axios.post('/subject/edit',this.subjectForm);
         }
-        if (res.data.code == 200) {
+        if(res.data.code == 200){
           this.$message({
-            message: this.mode == 'add'?'新增成功':'编辑成功',
-            type: "success"
-          });
-          this.dialogVisible =false;
-          this.$parent.search();
+          message: this.mode == 'add'?'新增成功':'编辑成功',
+          type: 'success'
+        });
+        this.dialogVisible = false;
+        this.$parent.search();
+        }else{
+          this.$message.error(res.data.message)
         }
       });
     }
   },
-  watch: {
-    dialogVisible(newValue) {
-      if (!newValue) {
+  watch:{
+    dialogVisible(newValue){
+      if(!newValue){
         this.$refs.subjectFormRef.clearValidate();
       }
     }
@@ -84,7 +86,7 @@ export default {
 </script>
 
 <style lang="less">
-.subjectEdit {
+.subject {
   .title {
     text-align: center;
     color: #fff;

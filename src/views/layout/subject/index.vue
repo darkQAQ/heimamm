@@ -1,5 +1,5 @@
 <template>
-  <div class="subject">
+  <div>
     <el-card>
       <el-form inline :model="searchForm" ref="searchFormRef" label-width="80px">
         <el-form-item label="学科编号" prop="rid">
@@ -12,46 +12,46 @@
           <el-input v-model="searchForm.username"></el-input>
         </el-form-item>
         <el-form-item label="状态" prop="status">
-          <el-select v-model="searchForm.status" placeholder="请选择">
-            <el-option label="禁用" :value="0"></el-option>
+          <el-select v-model="searchForm.status" placeholder="请选择状态">
             <el-option label="启用" :value="1"></el-option>
+            <el-option label="禁用" :value="0"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="search">搜索</el-button>
-          <el-button type="default" @click="clear">清除</el-button>
+          <el-button @click="clear">清除</el-button>
           <el-button type="primary" @click="addSubject">+新增学科</el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
-    <el-card style="margin-top:15px;">
-      <el-table stripe :data="subjectList" style="width: 100%">
+    <el-card style="margin-top:20px">
+      <el-table :data="subjectList" style="width: 100%">
         <el-table-column type="index" label="序号"></el-table-column>
         <el-table-column prop="rid" label="学科编号"></el-table-column>
         <el-table-column prop="name" label="学科名称"></el-table-column>
-        <el-table-column prop="intro" label="简称"></el-table-column>
+        <el-table-column prop="short_name" label="简称"></el-table-column>
         <el-table-column prop="username" label="创建者"></el-table-column>
         <el-table-column prop="create_time" label="创建日期"></el-table-column>
-        <el-table-column prop="status" label="状态">
+        <el-table-column label="状态">
           <template slot-scope="scope">
             <span
-              :style="{color: scope.row.status == '0'?'red' : 'green'}"
-            >{{scope.row.status === 0 ? '禁用' : '启用'}}</span>
+              :style="{color:scope.row.status == 0 ?'red':'#6ac144'}"
+            >{{scope.row.status == 0?'禁用':'启用'}}</span>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="280px">
           <template slot-scope="scope">
             <el-button type="primary" @click="editSubject(scope.row)">编辑</el-button>
             <el-button
-              :type="scope.row.status == 0?'success':'info'"
+              type="scope.row.status == 1 ?'success':'info'"
               @click="changeStatus(scope.row.id)"
-            >{{scope.row.status == 0?'启用':'禁用'}}</el-button>
-            <el-button type="primary" @click="deleteSubject(scope.row.id)">删除</el-button>
+            >{{scope.row.status==1?'禁用':'启用'}}</el-button>
+            <el-button type="primary" @click="deleteSubject">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
-      <div style="margin-top:15px;text-align:center;">
+      <div style="text-align:center">
         <el-pagination
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
@@ -63,36 +63,40 @@
         ></el-pagination>
       </div>
     </el-card>
-    <subject-edit ref="subjectedit"></subject-edit>
+    <subject-edit ref="subjectEdit"></subject-edit>
   </div>
 </template>
 
 <script>
-import SubjectEdit from "./subject-add-or-updata";
+import subjectEdit from "./subject-add-or-updata";
 export default {
-  name: "subject",
   components: {
-    SubjectEdit
+    subjectEdit
   },
   data() {
     return {
       searchForm: {
-        name: "", //学科名称
         rid: "", //学科编号
+        name: "", //学科名称
         username: "", //创建者用户名
         status: "" //状态
       },
-      page: 1, //页数
-      limit: 2, //一页显示多少
+      page: 1, //页码
+      limit: 2, //一页显示多少条
       total: 0, //总页数
-      subjectList: [] //学科列表
+      subjectList: []
     };
   },
   created() {
-    this.getSubjectInfo();
+    this.search();
   },
   methods: {
-    async getSubjectInfo() {
+    // 搜索
+    search() {
+      this.page = 1;
+      this.getSubjectList();
+    },
+    async getSubjectList() {
       const res = await this.$axios.get("/subject/list", {
         params: {
           page: this.page,
@@ -105,48 +109,27 @@ export default {
         this.total = res.data.data.pagination.total;
       }
     },
-    // 搜索
-    search() {
-      this.page = 1;
-      this.getSubjectInfo();
-    },
-    // 清空
+    // 清除
     clear() {
       this.$refs.searchFormRef.resetFields();
       this.search();
     },
-    // 添加学科
+    // 新增学科
     addSubject() {
-      this.$refs.subjectedit.subjectForm = {
+      this.$refs.subjectEdit.mode = "add";
+      this.$refs.subjectEdit.dialogVisible = true;
+      this.$refs.subjectEdit.subjectForm = {
         rid: "", //学科编号
         name: "", //学科名称
-        short_name: "", //学科简介
-        intro: "", //学科简称
+        short_name: "", //学科简称
+        intro: "", //学科简介
         remark: "" //备注
       };
-      this.$refs.subjectedit.dialogVisible = true;
-      this.$refs.subjectedit.mode = "add";
-    },
-    // 删除学科
-    async deleteSubject(id) {
-      const res = await this.$axios.post("/subject/remove", { id });
-      if (res.data.code == 200) {
-        this.search();
-      }
-    },
-    // 改变状态
-    async changeStatus(id) {
-      const res = await this.$axios.post("/subject/status", { id });
-      if (res.data.code == 200) {
-        this.getSubjectInfo();
-      }
     },
     // 编辑学科
     editSubject(row) {
-      console.log(row);
-
       const { id, rid, name, short_name, intro, remark } = row;
-      this.$refs.subjectedit.subjectForm = {
+      this.$refs.subjectEdit.subjectForm = {
         id,
         rid,
         name,
@@ -154,20 +137,28 @@ export default {
         intro,
         remark
       };
-      this.$refs.subjectedit.dialogVisible = true;
-      this.$refs.subjectedit.mode = "edit";
+      this.$refs.subjectEdit.mode = "edit";
+      this.$refs.subjectEdit.dialogVisible = true;
     },
-    //切换每页显示多少
+    // 改变状态
+    async changeStatus(id) {
+      const res = await this.$axios.post("/subject/status", { id });
+
+      if (res.data.code == 200) {
+        this.getSubjectList();
+      }
+    },
+    // 删除学科
+    deleteSubject() {},
+    // 切换每页显示多少条
     handleSizeChange(val) {
       this.limit = val;
       this.search();
-      // console.log(`每页 ${val} 条`);
     },
     // 切换页码
     handleCurrentChange(val) {
       this.page = val;
-      this.getSubjectInfo();
-      // console.log(`当前页: ${val}`);
+      this.getSubjectList();
     }
   }
 };

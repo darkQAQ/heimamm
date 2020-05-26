@@ -52,17 +52,19 @@
 </template>
 
 <script>
-import {setToken} from '@/utils/token.js'
+import { setToken } from "@/utils/token.js";
 // 导入子组件
-import register from './register'
+import register from "./register";
 export default {
   name: "login",
-  components:{
+  components: {
     register
   },
   data() {
     return {
-      codeUrl: "http://134.175.59.248/heimamm/public/captcha?type=login",
+      codeUrl:
+        "http://134.175.59.248/heimamm/public/captcha?type=login&xxx=" +
+        Math.random(),
       ruleForm: {
         phone: "18511111111",
         password: "12345678",
@@ -136,7 +138,7 @@ export default {
         }
       });
     },
-    registerClick(){
+    registerClick() {
       this.$refs.register.dialogVisible = true;
     }
   }
