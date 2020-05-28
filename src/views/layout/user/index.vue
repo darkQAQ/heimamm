@@ -45,8 +45,12 @@
         <el-table-column label="操作" width="280px">
           <template slot-scope="scope">
             <el-button type="primary" @click="editUser(scope.row)">编辑</el-button>
-            <el-button
+            <!-- <el-button
               @click="changeStatus(scope.row.id)"
+              :type="scope.row.status == 1?'info':'success'"
+            >{{scope.row.status == 1?'禁用':'启用'}}</el-button>-->
+            <el-button
+              @click="changeStatus('/user/status',scope.row.id)"
               :type="scope.row.status == 1?'info':'success'"
             >{{scope.row.status == 1?'禁用':'启用'}}</el-button>
             <el-button type="primary" @click="removeUser(scope.row.id)">删除</el-button>
@@ -64,14 +68,16 @@
       layout="total, sizes, prev, pager, next, jumper"
       :total="total"
     ></el-pagination>
-    <user-edit ref="userEdit" :mode='mode'></user-edit>
+    <user-edit ref="userEdit" :mode="mode"></user-edit>
   </div>
 </template>
 
 <script>
 import UserEdit from "./user-add-or-updata";
+import common from '@/mixins/common'
 export default {
   name: "UserList",
+  mixins:[common],
   components: {
     UserEdit
   },
@@ -86,7 +92,7 @@ export default {
       limit: 2, //一页显示多少
       userList: [], //用户列表
       total: 0, //总页数
-      mode:'add'
+      mode: "add"
     };
   },
   created() {
@@ -128,12 +134,12 @@ export default {
       // console.log(`当前页: ${val}`);
     },
     //改变用户状态
-    async changeStatus(id) {
-      const res = await this.$axios.post("/user/status", { id });
-      if (res.data.code == 200) {
-        this.search();
-      }
-    },
+    // async changeStatus(id) {
+    //   const res = await this.$axios.post("/user/status", { id });
+    //   if (res.data.code == 200) {
+    //     this.search();
+    //   }
+    // },
     //删除用户
     removeUser(id) {
       this.$confirm("此操作将永久删除该数据, 是否继续?", "提示", {
@@ -184,11 +190,11 @@ export default {
       this.$refs.userEdit.userForm = JSON.parse(JSON.stringify(row));
       this.$refs.userEdit.dialogVisible = true;
       this.mode = "edit";
-      this.$nextTick(()=>{
+      this.$nextTick(() => {
         //移除表单项的校验结果。
-        //不能调用重置  会把数据移出 
-          this.$refs.userEdit.$refs.userFormRef.clearValidate();
-      })
+        //不能调用重置  会把数据移出
+        this.$refs.userEdit.$refs.userFormRef.clearValidate();
+      });
     }
   }
 };
